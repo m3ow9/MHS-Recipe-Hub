@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food Tech Hub — Massey High School</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #1D9E75;
+      --green-dark: #0F6E56;
+      --green-light: #E1F5EE;
+      --green-text: #085041;
+      --bg: #ffffff;
+      --bg2: #f5f5f3;
+      --border: #e0dfd9;
+      --border2: #ccc;
+      --text: #1a1a1a;
+      --text2: #666;
+      --radius: 10px;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg2); color: var(--text); min-height: 100vh; }
+
+    /* ── Top bar ── */
+    .topbar { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 1.5rem; display: flex; align-items: center; gap: 1rem; height: 56px; position: sticky; top: 0; z-index: 50; }
+    .logo { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text); text-decoration: none; }
+    .logo i { color: var(--green); font-size: 22px; }
+    .logo span { color: var(--text2); font-weight: 400; font-size: 13px; margin-left: 4px; }
+    .nav-tabs { display: flex; gap: 4px; margin-left: auto; }
+    .nav-btn { background: none; border: none; padding: 7px 16px; border-radius: var(--radius); font-size: 13px; cursor: pointer; color: var(--text2); font-family: inherit; display: flex; align-items: center; gap: 6px; transition: background 0.15s; }
+    .nav-btn:hover { background: var(--bg2); }
+    .nav-btn.active { background: var(--bg2); color: var(--text); font-weight: 500; }
+
+    /* ── Layout ── */
+    .main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .screen { display: none; flex-direction: column; gap: 1rem; }
+    .screen.active { display: flex; }
+
+    /* ── Browse ── */
+    .search-row { display: flex; gap: 8px; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 0 12px; }
+    .search-row i { color: var(--text2); font-size: 18px; }
+    .search-row input { flex: 1; height: 42px; border: none; outline: none; font-size: 14px; background: transparent; color: var(--text); font-family: inherit; }
+    .filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 6px 16px; font-size: 13px; cursor: pointer; color: var(--text2); font-family: inherit; transition: all 0.15s; }
+    .filter-btn:hover { border-color: var(--green); color: var(--green-text); }
+    .filter-btn.on { background: var(--green-light); border-color: var(--green); color: var(--green-text); font-weight: 500; }
+    .recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+    .recipe-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; display: flex; flex-direction: column; gap: 8px; }
+    .recipe-card:hover { border-color: var(--green); box-shadow: 0 2px 12px rgba(29,158,117,0.1); }
+    .card-emoji { font-size: 30px; line-height: 1; }
+    .card-num { font-size: 11px; color: var(--green); font-weight: 600; }
+    .card-name { font-size: 14px; font-weight: 600; line-height: 1.3; }
+    .card-meta { font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 4px; }
+    .tag { display: inline-block; font-size: 11px; padding: 2px 9px; border-radius: 10px; background: var(--bg2); color: var(--text2); font-weight: 500; }
+    .tag.y9 { background: var(--green-light); color: var(--green-text); }
+    .tag.y10 { background: #E6F1FB; color: #0C447C; }
+    .tag.y11 { background: #EEEDFE; color: #3C3489; }
+    .tag.y12 { background: #FAEEDA; color: #633806; }
+    .tag.y13 { background: #FAECE7; color: #712B13; }
+    .empty { text-align: center; padding: 4rem 1rem; color: var(--text2); font-size: 14px; }
+    .empty i { font-size: 48px; display: block; margin-bottom: 12px; opacity: 0.3; }
+
+    /* ── Detail ── */
+    .back-btn { background: none; border: none; cursor: pointer; color: var(--text2); font-size: 13px; display: flex; align-items: center; gap: 6px; padding: 0; font-family: inherit; }
+    .back-btn:hover { color: var(--text); }
+    .detail-header { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; gap: 1.25rem; align-items: flex-start; flex-wrap: wrap; }
+    .detail-emoji { font-size: 52px; flex-shrink: 0; line-height: 1; }
+    .detail-info { flex: 1; min-width: 200px; }
+    .detail-info h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+    .detail-info p { font-size: 14px; color: var(--text2); line-height: 1.6; }
+    .detail-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .action-btn { border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500; font-family: inherit; white-space: nowrap; transition: background 0.15s; }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-green:hover { background: var(--green-dark); }
+    .btn-outline { background: none; border: 1px solid var(--border2); color: var(--text); }
+    .btn-outline:hover { background: var(--bg2); }
+    .groups-bar { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.5rem; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .groups-bar-label { font-size: 13px; font-weight: 500; }
+    .groups-bar-sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
+    .grp-btns { display: flex; gap: 6px; }
+    .grp-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border2); background: none; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text2); font-family: inherit; transition: all 0.15s; }
+    .grp-btn:hover { border-color: var(--green); color: var(--green-text); }
+    .grp-btn.selected { background: var(--green); border-color: var(--green); color: #fff; }
+    .section-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+    .section-card h3 { font-size: 11px; font-weight: 600; margin-bottom: 14px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
+    .ing-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .ing-table th { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--text2); font-weight: 500; font-size: 11px; }
+    .ing-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    .ing-table tr:last-child td { border-bottom: none; }
+    .scaled-qty { font-weight: 600; color: var(--green-text); }
+    .per-group { font-size: 11px; color: var(--text2); margin-left: 4px; }
+    .matched-badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--green-light); color: var(--green-text); font-weight: 500; }
+    .steps-list { display: flex; flex-direction: column; gap: 12px; }
+    .step { display: flex; gap: 12px; align-items: flex-start; }
+    .step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--green-light); color: var(--green-text); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .step p { font-size: 14px; line-height: 1.6; }
+
+    /* ── Order Form (in-app) ── */
+    .of-wrap { background: #fff; color: #111; font-family: Arial, sans-serif; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .of-print-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    .of-print-bar p { font-size: 13px; color: var(--text2); }
+    .of-header { padding: 8px 10px; border-bottom: 2px solid #111; }
+    .of-title { font-size: 12px; font-weight: bold; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 6px; }
+    .of-recipe-badge { background: #e8f8f0; border: 1px solid #aad4be; border-radius: 4px; padding: 5px 9px; margin-bottom: 7px; display: flex; align-items: center; gap: 10px; }
+    .of-meta { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: 10px; }
+    .of-meta-lbl { font-weight: bold; white-space: nowrap; }
+    .of-checks { display: flex; gap: 10px; flex-wrap: wrap; }
+    .of-ck { display: flex; align-items: center; gap: 3px; font-size: 10px; }
+    .of-grid { display: flex; gap: 2px; padding: 5px; background: #e8e8e8; }
+    .of-col { border: 1px solid #999; background: #fff; flex: 1; min-width: 0; }
+    .of-col-head { background: #1a3c34; color: #fff; font-size: 9px; font-weight: bold; padding: 3px 4px; letter-spacing: 0.03em; }
+    .of-row { display: flex; border-bottom: 0.5px solid #e0e0e0; }
+    .of-row:last-child { border-bottom: none; }
+    .of-row.ticked { background: #dff5eb; }
+    .of-item { flex: 1; padding: 2px 4px; font-size: 9.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .of-qty { width: 38px; padding: 2px 3px; text-align: center; border-left: 0.5px solid #ddd; font-weight: bold; color: #085041; font-size: 9.5px; flex-shrink: 0; }
+    .of-extra { padding: 0 5px 4px; }
+    .of-extra-inner { border: 1px solid #999; }
+    .of-extra-items { display: flex; flex-wrap: wrap; gap: 3px; padding: 4px; }
+    .of-extra-item { font-size: 9.5px; border: 1px solid #ddd; padding: 2px 6px; border-radius: 2px; background: #fff; }
+    .of-notes { padding: 8px 10px; min-height: 56px; border-top: 1px solid #ddd; }
+    .of-notes-lbl { font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; color: #777; margin-bottom: 4px; }
+    .of-footer-bar { text-align: center; font-size: 9px; color: #aaa; padding: 4px; border-top: 1px solid #eee; }
+
+    /* ── Admin ── */
+    .admin-form { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; gap: 14px; }
+    .admin-form h3 { font-size: 15px; font-weight: 600; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 12px; color: var(--text2); font-weight: 500; }
+    .form-group input, .form-group select, .form-group textarea { border: 1px solid var(--border2); border-radius: 8px; padding: 8px 12px; font-size: 13px; background: var(--bg); color: var(--text); font-family: inherit; outline: none; transition: border-color 0.15s; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--green); }
+    .form-group textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+    .save-btn { background: var(--green); color: #fff; border: none; border-radius: 8px; padding: 10px 22px; font-size: 13px; cursor: pointer; font-weight: 500; font-family: inherit; align-self: flex-end; }
+    .save-btn:hover { background: var(--green-dark); }
+    .manage-list { display: flex; flex-direction: column; gap: 8px; }
+    .manage-row { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+    .manage-row-info { flex: 1; }
+    .manage-row-info span { font-size: 14px; font-weight: 500; }
+    .manage-row-info p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .del-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 12px; color: var(--text2); cursor: pointer; font-family: inherit; }
+    .del-btn:hover { border-color: #E24B4A; color: #A32D2D; }
+
+    /* ── Toast ── */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--green); color: #fff; padding: 11px 20px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 200; font-family: inherit; }
+    .toast.show { opacity: 1; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .main { padding: 1rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .detail-header { flex-direction: column; }
+      .topbar { padding: 0 1rem; }
+      .logo span { display: none; }
+    }
+
+    /* ── Print styles ── */
+    @media print {
+      .of-title { font-size: 11px; }
+      .of-grid { padding: 3px; gap: 2px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="logo" href="#" onclick="showScreen('browse');return false;">
+    <i class="ti ti-chef-hat"></i>
+    Food Tech Hub
+    <span>Massey High School</span>
+  </a>
+  <div class="nav-tabs">
+    <button class="nav-btn active" id="nav-recipes" onclick="showScreen('browse')"><i class="ti ti-book-2"></i> Recipes</button>
+    <button class="nav-btn" id="nav-admin" onclick="showScreen('admin')"><i class="ti ti-settings"></i> Manage</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ══ BROWSE ══ -->
+  <div class="screen active" id="screen-browse">
+    <div class="search-row">
+      <i class="ti ti-search"></i>
+      <input type="text" placeholder="Search recipes…" id="search-input" oninput="renderCards()">
+    </div>
+    <div class="filter-row" id="filter-row"></div>
+    <div id="recipe-grid" class="recipe-grid"></div>
+  </div>
+
+  <!-- ══ DETAIL ══ -->
+  <div class="screen" id="screen-detail">
+    <button class="back-btn" onclick="showScreen('browse')"><i class="ti ti-arrow-left"></i> Back to recipes</button>
+    <div id="detail-content"></div>
+  </div>
+
+  <!-- ══ ORDER FORM ══ -->
+  <div class="screen" id="screen-orderform">
+    <button class="back-btn" onclick="showScreen('detail')"><i class="ti ti-arrow-left"></i> Back to recipe</button>
+    <div id="orderform-content"></div>
+  </div>
+
+  <!-- ══ ADMIN ══ -->
+  <div class="screen" id="screen-admin">
+    <div class="admin-form">
+      <h3>Add a new recipe</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Recipe name</label><input type="text" id="a-name" placeholder="e.g. Pikelets"></div>
+        <div class="form-group"><label>Emoji icon</label><input type="text" id="a-emoji" placeholder="🥞" style="font-size:20px"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Year level</label>
+          <select id="a-year"><option>Year 9</option><option>Year 10</option><option>Year 11</option><option>Year 12</option><option>Year 13</option><option>All levels</option></select>
+        </div>
+        <div class="form-group"><label>Practical number</label><input type="text" id="a-num" placeholder="e.g. Practical 1"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Cook time</label><input type="text" id="a-time" placeholder="e.g. 30 mins"></div>
+        <div class="form-group"><label>Short description</label><input type="text" id="a-desc" placeholder="Brief description…"></div>
+      </div>
+      <div class="form-group">
+        <label>Ingredients — one per line: quantity, unit, name &nbsp;<em style="font-weight:400">(quantities are per group)</em></label>
+        <textarea id="a-ings" placeholder="1, cup, Flour (plain)&#10;2, , Eggs&#10;75, g, Butter&#10;1, pinch, Salt"></textarea>
+      </div>
+      <div class="form-group"><label>Equipment (comma separated)</label><input type="text" id="a-equip" placeholder="e.g. Muffin Tins, Electric Beater"></div>
+      <div class="form-group"><label>Method steps (one per line)</label><textarea id="a-steps" placeholder="Preheat oven to 180°C&#10;Mix dry ingredients together&#10;Fold in wet ingredients"></textarea></div>
+      <button class="save-btn" onclick="saveRecipe()"><i class="ti ti-plus"></i> Add recipe</button>
+    </div>
+    <div class="manage-list" id="manage-list"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Storage key ──
+const STORAGE_KEY = 'foodtech_v4';
+
+// ── Order form data (exact from uploaded docx) ──
+const OF = {
+  TROLLEY:     ['Salt','Pepper','Flour (plain)','Flour (SR)','Baking Powder','Baking Soda','Cocoa','Sugar (white)','Sugar (brown)','Sugar (raw)','Icing Sugar','Rolled Oats','Cornflour','Rice','Breadcrumbs','Coconut'],
+  FRESH_HERBS: ['Thyme','Basil','Parsley','Coriander','Garlic','Ginger'],
+  EGGS:        ['Eggs'],
+  HERBS_SPICES:['Nutmeg','Ginger','Oregano','Basil','Thyme','Coriander','Curry Powder','Cinnamon','Cumin','Sage','Parsley','Cayenne Pepper','Paprika','Mixed Herbs','Chilli Powder/Flakes'],
+  PASTRY:      ['Puff','Flaky','Short Sweet','Savoury','Filo'],
+  MEAT:        ['Bacon','Chicken Breast','Ham','Sausages Beef/Pork','Beef','Mince Beef','Mince Pork','Mince Chicken'],
+  FROZEN:      ['Mixed berries','Blueberries','Raspberries','Peas','Beans','Corn'],
+  FRUIT_VEG:   ['Lemons','Potatoes','Carrots','Onions','Tomatoes','Cucumber','Capsicum','Spring Onion','Spinach','Lettuce','Mixed Salad'],
+  PASTA:       ['Spaghetti','Penne','Spirals','Bows','Fettucine','Angel Hair','Macaroni','Egg Noodle','Vermicelli'],
+  SAUCES:      ['Soy','Worcestershire','White Vinegar','Mustard','Balsamic','Mayonnaise','Teriyaki','BBQ sauce','Tomato Sauce','Sweet Chilli sauce','Crushed Garlic','Crushed Ginger'],
+  TINS:        ['Olive Oil/Canola/Vegetable','Corn Kernels','Creamed Corn','Apples','Peaches','Apricots','Jam (specify)','Pineapple Rings','Pineapple pieces','Tomatoes','Tomato Paste','Olives','Chickpeas','Condensed milk','Lemon Juice','Lime Juice'],
+  DAIRY:       ['Butter','Milk','Cheese Tasty','Mozzarella','Parmesan','Feta','Cream','Sour Cream','Cream Cheese','Yogurt'],
+  BAKING:      ['Golden Syrup','Choc Chips','Choc melts','Chocolate Bar','Almonds','Walnuts','Food Colouring','Vanilla Essen','Spray Oil','Muffin Cases'],
+  EQUIPMENT:   ['Muffin Tins','Electric Beater','Pie Maker','Waffle Maker','Food Processor','Quiche Tins']
+};
+const OF_LABELS = {
+  TROLLEY:'TROLLEY ITEMS', FRESH_HERBS:'FRESH HERBS', EGGS:'EGGS',
+  HERBS_SPICES:'HERBS & SPICES', PASTRY:'PASTRY', MEAT:'MEAT',
+  FROZEN:'FROZEN FRUIT & VEG', FRUIT_VEG:'FRUIT & VEG', PASTA:'PASTA',
+  SAUCES:'SAUCES / VINEGARS / DRESSINGS', TINS:'TINS / JARS / BOTTLES',
+  DAIRY:'DAIRY', BAKING:'BAKING ITEMS', EQUIPMENT:'EQUIPMENT'
+};
+
+// ── Ingredient → form section matcher ──
+function matchToForm(ingName) {
+  const n = ingName.toLowerCase().replace(/[^a-z0-9 ]/g, '');
+  const words = n.split(' ').filter(w => w.length > 2);
+  for (const [sec, items] of Object.entries(OF)) {
+    for (const item of items) {
+      const il = item.toLowerCase().replace(/[^a-z0-9 ]/g, '');
+      if (n === il || n.includes(il) || il.includes(n)) return { sec, item };
+      if (words.some(w => il.includes(w) && w.length > 3)) return { sec, item };
+    }
+  }
+  return null;
+}
+
+// ── Fraction-aware quantity parser ──
+function parseQty(str) {
+  if (!str || str.trim() === '') return null;
+  str = str.trim();
+  const fracs = {'¼':0.25,'½':0.5,'¾':0.75,'⅓':0.333,'⅔':0.667,'⅛':0.125,'⅜':0.375,'⅝':0.625,'⅞':0.875};
+  let val = 0, s = str;
+  for (const [f, fv] of Object.entries(fracs)) { if (s.includes(f)) { val += fv; s = s.replace(f, '').trim(); } }
+  if (s.includes('/')) { const p = s.split('/'); val += parseFloat(p[0]) / parseFloat(p[1]); return isNaN(val) ? null : val; }
+  if (s !== '') val += parseFloat(s) || 0;
+  return val || null;
+}
+function formatQty(num, unit) {
+  if (num === null) return '—';
+  if (Number.isInteger(num)) return String(num);
+  const fracs = [[0.25,'¼'],[0.5,'½'],[0.75,'¾'],[0.333,'⅓'],[0.667,'⅔'],[0.125,'⅛']];
+  const whole = Math.floor(num), frac = num - whole;
+  for (const [fv, fs] of fracs) { if (Math.abs(frac - fv) < 0.04) return (whole > 0 ? whole : '') + fs; }
+  if (!unit || unit.trim() === '') return Math.round(num).toString();
+  return parseFloat(num.toFixed(1)).toString();
+}
+function scaleQty(qtyStr, groups) {
+  const base = parseQty(qtyStr);
+  if (base === null) return qtyStr;
+  return formatQty(base * groups);
+}
+function isNonNumeric(str) { return parseQty(str) === null; }
+
+// ── Year 9 built-in recipes ──
+const Y9 = [
+  { id:'p1', practical:'Practical 1', name:'Pikelets', emoji:'🥞', year:'Year 9', time:'20 mins',
+    desc:'Classic NZ pikelets — whisking, pan frying and the aeration function of eggs.',
+    ingredients:[{qty:'1',unit:'',name:'Eggs'},{qty:'¼',unit:'cup',name:'Sugar (white)'},{qty:'1',unit:'cup',name:'Flour (plain)'},{qty:'1',unit:'tsp',name:'Baking Powder'},{qty:'¼',unit:'tsp',name:'Salt'},{qty:'¾',unit:'cup',name:'Milk'}],
+    equipment:'Frying pan, mixing bowl, whisk',
+    steps:['Grease a frying pan with oil on medium heat.','Sift flour, baking powder and salt into a bowl.','Beat egg and sugar until thick, add milk and mix until smooth.','Spoon tablespoon amounts onto pan. Turn when bubbles appear (2–3 mins). Cook until golden.'] },
+  { id:'p2', practical:'Practical 2', name:'Fat Free Sponge', emoji:'🎂', year:'Year 9', time:'25 mins',
+    desc:'Fat-free sponge demonstrating aeration and coagulation of eggs. Optional Victoria Sponge version.',
+    ingredients:[{qty:'3',unit:'',name:'Eggs'},{qty:'75',unit:'g',name:'Sugar (white)'},{qty:'75',unit:'g',name:'Flour (SR)'},{qty:'100',unit:'g',name:'Cream'},{qty:'100',unit:'g',name:'Jam'}],
+    equipment:'Electric Beater, 2 circular baking tins, baking paper',
+    steps:['Preheat oven to 170°C. Line 2 tins with baking paper.','Whisk eggs and sugar until tripled in size and stiff.','Carefully fold in flour. Pour into tin and bake 12 minutes.','Cool, whisk cream. Spread jam, top with cream, sandwich together.'] },
+  { id:'p3', practical:'Practical 3', name:'Chocolate Chip Biscuits', emoji:'🍪', year:'Year 9', time:'25 mins',
+    desc:'Creaming method — introduces manipulation and transformation concepts.',
+    ingredients:[{qty:'125',unit:'g',name:'Butter'},{qty:'200',unit:'g',name:'Sugar (brown)'},{qty:'½',unit:'tsp',name:'Baking Powder'},{qty:'1',unit:'',name:'Eggs'},{qty:'180',unit:'g',name:'Flour (plain)'},{qty:'1',unit:'tsp',name:'Vanilla Essen'},{qty:'¼',unit:'tsp',name:'Salt'},{qty:'50',unit:'g',name:'Choc Chips'}],
+    equipment:'Electric Beater, baking tray, baking paper, wooden spoon',
+    steps:['Preheat oven to 180°C fan bake. Line a baking tray.','Beat butter, brown sugar and vanilla until pale. Add egg and beat.','Sift in flour and salt. Stir in choc chips with a wooden spoon.','Roll into balls, press with fork. Bake 14–15 mins until golden.'] },
+  { id:'p4', practical:'Practical 4', name:'Mini Quiche', emoji:'🥧', year:'Year 9', time:'30 mins',
+    desc:'Mini quiches using short savoury pastry — coagulation and pastry lining.',
+    ingredients:[{qty:'2',unit:'sheets',name:'Savoury'},{qty:'2',unit:'rashers',name:'Bacon'},{qty:'50',unit:'g',name:'Cheese Tasty'},{qty:'2',unit:'T',name:'Milk'},{qty:'2',unit:'',name:'Eggs'},{qty:'½',unit:'',name:'Onions'},{qty:'¼',unit:'',name:'Capsicum'},{qty:'1',unit:'pinch',name:'Salt'},{qty:'1',unit:'pinch',name:'Cayenne Pepper'}],
+    equipment:'Quiche Tins, baking paper',
+    steps:['Preheat oven to 180°C fan bake.','Grease tin. Cut pastry and line moulds.','Dice bacon, onion and capsicum. Mix all ingredients.','Fill bases and bake 15–18 mins until golden.'] },
+  { id:'p5', practical:'Practical 5', name:'Chicken Schnitzel Wrap', emoji:'🌯', year:'Year 9', time:'30 mins',
+    desc:'Crumbed chicken schnitzels in a wrap — coating and glazing functions of eggs.',
+    ingredients:[{qty:'200',unit:'g',name:'Chicken Breast'},{qty:'2',unit:'T',name:'Flour (plain)'},{qty:'2',unit:'',name:'Eggs'},{qty:'60',unit:'g',name:'Breadcrumbs'},{qty:'½',unit:'tsp',name:'Mixed Herbs'},{qty:'1',unit:'pinch',name:'Salt'},{qty:'1',unit:'pinch',name:'Pepper'},{qty:'3',unit:'T',name:'Olive Oil/Canola/Vegetable'},{qty:'3',unit:'',name:'Tortilla Wraps'},{qty:'1',unit:'handful',name:'Cheese Tasty'},{qty:'1',unit:'handful',name:'Lettuce'},{qty:'1',unit:'',name:'Cucumber'},{qty:'1',unit:'T',name:'Mayonnaise'}],
+    equipment:'Baking tray, 3 plates',
+    steps:['Preheat oven to 180°C fan bake.','Cut chicken into strips.','Coat in seasoned flour → beaten egg → breadcrumbs.','Bake on lined tray 10–12 mins. Assemble in wraps.'] },
+  { id:'p6', practical:'Practical 6', name:'Brownies', emoji:'🍫', year:'Year 9', time:'40 mins',
+    desc:'Rich chocolate brownies — enriching and binding functions of eggs.',
+    ingredients:[{qty:'125',unit:'g',name:'Butter'},{qty:'200',unit:'g',name:'Sugar (white)'},{qty:'2',unit:'',name:'Eggs'},{qty:'1',unit:'tsp',name:'Vanilla Essen'},{qty:'40',unit:'g',name:'Cocoa'},{qty:'½',unit:'cup',name:'Choc Chips'},{qty:'65',unit:'g',name:'Flour (plain)'},{qty:'¼',unit:'tsp',name:'Salt'},{qty:'¼',unit:'tsp',name:'Baking Powder'}],
+    equipment:'8-inch square baking pan, saucepan',
+    steps:['Preheat oven to 180°C fan bake. Grease and flour pan.','Melt butter. Stir in sugar, eggs and vanilla.','Beat in cocoa, flour, salt, baking powder. Add choc chips last.','Spread into pan. Bake 25–30 mins. Do not overcook.'] },
+  { id:'p7', practical:'Practical 7', name:'Lemon Meringue Pie', emoji:'🍋', year:'Year 9', time:'35 mins',
+    desc:'Individual lemon meringue pies — thickening (yolk) and aeration (white) of eggs.',
+    ingredients:[{qty:'½',unit:'cup',name:'Water'},{qty:'¼',unit:'cup',name:'Lemon Juice'},{qty:'¼',unit:'cup',name:'Sugar (white)'},{qty:'2',unit:'T',name:'Cornflour'},{qty:'15',unit:'g',name:'Butter'},{qty:'1',unit:'',name:'Egg Yolk'},{qty:'1',unit:'',name:'Egg White'},{qty:'42',unit:'g',name:'Sugar (white)'},{qty:'½',unit:'tsp',name:'Lemon Juice'},{qty:'1',unit:'',name:'Short Sweet pastry case'}],
+    equipment:'Saucepan, Electric Beater, Quiche Tins',
+    steps:['Preheat oven to 220°C bake.','Combine water, lemon juice, sugar, cornflour. Boil until thick. Simmer 3 mins.','Stir in butter and yolk. Spoon into pastry cases.','Beat egg whites, add sugar until stiff. Spoon over filling. Bake 4–5 mins.'] },
+  { id:'p8', practical:'Practical 8', name:'Chicken Sausage Rolls', emoji:'🥐', year:'Year 9', time:'35 mins',
+    desc:'Chicken sausage rolls in puff pastry — glazing and binding functions of eggs.',
+    ingredients:[{qty:'200',unit:'g',name:'Mince Chicken'},{qty:'30',unit:'g',name:'Breadcrumbs'},{qty:'1',unit:'',name:'Carrots'},{qty:'½',unit:'',name:'Onions'},{qty:'2',unit:'T',name:'Parsley'},{qty:'10',unit:'g',name:'Spinach'},{qty:'50',unit:'g',name:'Cheese Tasty'},{qty:'2',unit:'sheets',name:'Puff'},{qty:'1',unit:'',name:'Eggs'},{qty:'1',unit:'splash',name:'Milk'}],
+    equipment:'Baking tray, pastry brush, baking paper',
+    steps:['Preheat oven to 190°C fan bake.','Mix filling ingredients. Cut pastry in half, fill and roll up.','Slice on angle. Glaze with beaten egg and milk.','Bake 25 mins until golden.'] },
+  { id:'p9', practical:'Practical 9', name:'Burger', emoji:'🍔', year:'Year 9', time:'25 mins',
+    desc:'Homemade beef patties — binding function of eggs and safe mince cookery.',
+    ingredients:[{qty:'½',unit:'',name:'Onions'},{qty:'1',unit:'tsp',name:'Crushed Garlic'},{qty:'200',unit:'g',name:'Mince Beef'},{qty:'1',unit:'',name:'Eggs'},{qty:'2',unit:'T',name:'Breadcrumbs'},{qty:'1',unit:'tsp',name:'Mixed Herbs'},{qty:'1',unit:'pinch',name:'Salt'},{qty:'1',unit:'pinch',name:'Pepper'},{qty:'3',unit:'slices',name:'Cheese Tasty'},{qty:'1',unit:'T',name:'Tomato Sauce'},{qty:'1',unit:'T',name:'Mayonnaise'},{qty:'3',unit:'',name:'Burger buns'}],
+    equipment:'Frying pan, mixing bowl',
+    steps:['Mix all ingredients, egg last. Shape into 3 patties.','Cook in oiled pan 3 mins each side until cooked through.','Serve on buns with toppings.'] },
+  { id:'p10', practical:'Practical 10', name:'Savoury Cupcakes', emoji:'🧁', year:'Year 9', time:'25 mins',
+    desc:'Savoury muffins with cheese and capsicum — enriching and binding of eggs.',
+    ingredients:[{qty:'1',unit:'T',name:'Celery'},{qty:'1',unit:'T',name:'Capsicum'},{qty:'¾',unit:'cup',name:'Cheese Tasty'},{qty:'2',unit:'cups',name:'Flour (plain)'},{qty:'4',unit:'tsp',name:'Baking Powder'},{qty:'1',unit:'pinch',name:'Cayenne Pepper'},{qty:'¼',unit:'tsp',name:'Salt'},{qty:'1',unit:'',name:'Eggs'},{qty:'50',unit:'g',name:'Butter'},{qty:'1½',unit:'cups',name:'Milk'}],
+    equipment:'Muffin Tins, mixing bowl',
+    steps:['Preheat oven to 200°C. Grease muffin tin.','Mix celery, capsicum, cheese. Sift in dry ingredients.','Stir in egg, melted butter and milk.','Spoon into tin. Bake 15 mins until golden.'] }
+];
+
+// ── App state ──
+let recipes = [], activeFilters = new Set(), currentRecipe = null, selectedGroups = 8;
+
+// ── Local Storage (GitHub Pages can't use window.storage API) ──
+function lsGet(key) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch(e) { return null; } }
+function lsSet(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {} }
+
+function loadRecipes() {
+  const saved = lsGet(STORAGE_KEY) || [];
+  const y9Ids = new Set(Y9.map(x => x.id));
+  recipes = [...Y9, ...saved.filter(x => !y9Ids.has(x.id))];
+  renderFilters(); renderCards(); renderManageList();
+}
+function saveAll() { lsSet(STORAGE_KEY, recipes); }
+
+// ── Helpers ──
+function getYears() { return [...new Set(recipes.map(r => r.year))].sort(); }
+function yearClass(y) {
+  if (y.includes('9')) return 'y9'; if (y.includes('10')) return 'y10';
+  if (y.includes('11')) return 'y11'; if (y.includes('12')) return 'y12';
+  if (y.includes('13')) return 'y13'; return '';
+}
+
+// ── Render filters ──
+function renderFilters() {
+  document.getElementById('filter-row').innerHTML = getYears().map(y =>
+    `<button class="filter-btn ${activeFilters.has(y)?'on':''}" onclick="toggleFilter('${y}')">${y}</button>`
+  ).join('');
+}
+function toggleFilter(y) {
+  if (activeFilters.has(y)) activeFilters.delete(y); else activeFilters.add(y);
+  renderFilters(); renderCards();
+}
+
+// ── Render recipe cards ──
+function renderCards() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const list = recipes.filter(r =>
+    (r.name.toLowerCase().includes(q) || (r.desc||'').toLowerCase().includes(q)) &&
+    (activeFilters.size === 0 || activeFilters.has(r.year))
+  );
+  const grid = document.getElementById('recipe-grid');
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><i class="ti ti-search"></i>No recipes found</div>';
+    return;
+  }
+  grid.innerHTML = list.map(r => `
+    <div class="recipe-card" onclick="showDetail('${r.id}')">
+      <div class="card-emoji">${r.emoji||'🍴'}</div>
+      ${r.practical ? `<div class="card-num">${r.practical}</div>` : ''}
+      <div class="card-name">${r.name}</div>
+      <div class="card-meta"><i class="ti ti-clock" style="font-size:13px"></i> ${r.time}</div>
+      <span class="tag ${yearClass(r.year)}">${r.year}</span>
+    </div>`).join('');
+}
+
+// ── Group selector ──
+function setGroups(n) {
+  selectedGroups = n;
+  document.querySelectorAll('.grp-btn').forEach(b => b.classList.toggle('selected', parseInt(b.dataset.g) === n));
+  const gl = document.getElementById('groups-label'); if (gl) gl.textContent = n;
+  const sc = document.getElementById('student-count'); if (sc) sc.textContent = n * 3;
+  renderDetailIngredients();
+}
+
+// ── Render ingredient table in detail view ──
+function renderDetailIngredients() {
+  if (!currentRecipe || !document.getElementById('ing-tbody')) return;
+  const r = currentRecipe, g = selectedGroups;
+  const matched = r.ingredients.map(i => ({...i, match: matchToForm(i.name)}));
+  document.getElementById('ing-tbody').innerHTML = matched.map(i => {
+    const num = !isNonNumeric(i.qty);
+    const sd = num ? `<span class="scaled-qty">${scaleQty(i.qty, g)}</span>` : i.qty;
+    const pg = num ? `<span class="per-group">(${i.qty}×${g})</span>` : '';
+    return `<tr>
+      <td>${sd}${pg}</td><td>${i.unit}</td><td>${i.name}</td>
+      <td>${i.match
+        ? `<span class="matched-badge">✓ ${OF_LABELS[i.match.sec]||i.match.sec}</span>`
+        : `<span style="font-size:11px;color:var(--text2)">extra item</span>`}</td>
+    </tr>`;
+  }).join('');
+  const mc = matched.filter(i => i.match).length;
+  const mt = document.getElementById('match-tag'); if (mt) mt.textContent = `${mc}/${r.ingredients.length} matched to form`;
+}
+
+// ── Show recipe detail ──
+function showDetail(id) {
+  currentRecipe = recipes.find(r => r.id === id); if (!currentRecipe) return;
+  const r = currentRecipe;
+  const groupBtns = [1,2,3,4,5,6,7,8].map(n =>
+    `<button class="grp-btn ${n===selectedGroups?'selected':''}" data-g="${n}" onclick="setGroups(${n})">${n}</button>`
+  ).join('');
+  const steps = r.steps.map((s,i) =>
+    `<div class="step"><div class="step-num">${i+1}</div><p>${s}</p></div>`
+  ).join('');
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-header">
+      <div class="detail-emoji">${r.emoji||'🍴'}</div>
+      <div class="detail-info">
+        <h2>${r.practical ? r.practical+': ' : ''}${r.name}</h2>
+        <p>${r.desc||''}</p>
+        <div class="detail-tags">
+          <span class="tag ${yearClass(r.year)}">${r.year}</span>
+          <span class="tag"><i class="ti ti-clock" style="font-size:11px"></i> ${r.time}</span>
+          <span class="tag" id="match-tag"></span>
+        </div>
+        <div class="btn-row">
+          <button class="action-btn btn-outline" onclick="showOrderForm(false)">
+            <i class="ti ti-file-text"></i> Open blank order form
+          </button>
+          <button class="action-btn btn-green" onclick="showOrderForm(true)">
+            <i class="ti ti-clipboard-check"></i> Open form with recipe ticked
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="groups-bar">
+      <div>
+        <div class="groups-bar-label">Number of groups</div>
+        <div class="groups-bar-sub">3 students per group &nbsp;·&nbsp; <span id="student-count">${selectedGroups*3}</span> students total</div>
+      </div>
+      <div class="grp-btns">${groupBtns}</div>
+    </div>
+
+    <div class="section-card">
+      <h3>Ingredients — scaled for <span id="groups-label">${selectedGroups}</span> groups</h3>
+      <table class="ing-table">
+        <thead><tr><th>Total qty needed</th><th>Unit</th><th>Ingredient</th><th>Order form section</th></tr></thead>
+        <tbody id="ing-tbody"></tbody>
+      </table>
+    </div>
+
+    ${r.equipment ? `<div class="section-card"><h3>Equipment needed</h3><p style="font-size:14px;line-height:1.8">${r.equipment}</p></div>` : ''}
+
+    <div class="section-card">
+      <h3>Method (per group)</h3>
+      <div class="steps-list">${steps}</div>
+    </div>`;
+
+  renderDetailIngredients();
+  showScreen('detail');
+}
+
+// ── Build and show order form in-app ──
+function showOrderForm(withRecipe) {
+  if (!currentRecipe) return;
+  const r = currentRecipe, g = selectedGroups;
+
+  const tickedBySection = {}, extraItems = [];
+  if (withRecipe) {
+    r.ingredients.forEach(ing => {
+      const scaledQty = isNonNumeric(ing.qty) ? ing.qty : scaleQty(ing.qty, g);
+      const displayQty = `${scaledQty}${ing.unit && ing.unit.trim() ? ' '+ing.unit : ''}`;
+      const match = matchToForm(ing.name);
+      if (match) {
+        if (!tickedBySection[match.sec]) tickedBySection[match.sec] = [];
+        tickedBySection[match.sec].push({item: match.item, qty: displayQty});
+      } else {
+        extraItems.push({...ing, scaledQty});
+      }
+    });
+  }
+  const equipList = r.equipment ? r.equipment.split(',').map(e => e.trim()).filter(Boolean) : [];
+
+  function ofCol(secKey) {
+    const label = OF_LABELS[secKey];
+    const rows = OF[secKey].map(item => {
+      const t = tickedBySection[secKey] && tickedBySection[secKey].find(x => x.item === item);
+      return `<div class="of-row${t?' ticked':''}">
+        <div class="of-item">${t?'☑':'☐'} ${item}</div>
+        <div class="of-qty">${t ? t.qty : ''}</div>
+      </div>`;
+    }).join('');
+    return `<div class="of-col"><div class="of-col-head">${label}</div>${rows}</div>`;
+  }
+
+  const equipRows = OF.EQUIPMENT.map(item => {
+    const t = equipList.some(e => e.toLowerCase().includes(item.toLowerCase()) || item.toLowerCase().includes(e.toLowerCase()));
+    return `<div class="of-row${t?' ticked':''}"><div class="of-item">${t?'☑':'☐'} ${item}</div><div class="of-qty"></div></div>`;
+  }).join('');
+
+  const recipeBadge = withRecipe ? `
+    <div class="of-recipe-badge">
+      <div style="font-size:20px">${r.emoji||'🍴'}</div>
+      <div style="flex:1">
+        <div style="font-size:11px;font-weight:bold;color:#085041">${r.practical?r.practical+': ':''}${r.name}</div>
+        <div style="font-size:9px;color:#444;margin-top:1px">${r.desc||''}</div>
+      </div>
+      <div style="font-size:9px;font-weight:bold;background:#085041;color:#fff;padding:2px 8px;border-radius:3px;white-space:nowrap">${g} groups · ${g*3} students</div>
+    </div>` : '';
+
+  const extraBlock = extraItems.length ? `
+    <div class="of-extra">
+      <div class="of-extra-inner">
+        <div class="of-col-head">ADDITIONAL ITEMS (not on main form)</div>
+        <div class="of-extra-items">
+          ${extraItems.map(i => `<div class="of-extra-item"><b>${i.scaledQty}${i.unit&&i.unit.trim()?' '+i.unit:''}</b> ${i.name}</div>`).join('')}
+        </div>
+      </div>
+    </div>` : '';
+
+  document.getElementById('orderform-content').innerHTML = `
+    <div class="of-wrap">
+      <div class="of-print-bar">
+        <p>${withRecipe
+          ? `Ingredients for <strong>${r.name}</strong> are pre-highlighted. Tick teacher/class/day/period, add any notes, then print.`
+          : 'Blank order form — tick items manually, add notes, then print.'}</p>
+        <button class="action-btn btn-green" onclick="printOrderForm()"><i class="ti ti-printer"></i> Print this form</button>
+      </div>
+
+      <div id="of-printable">
+        <div class="of-header">
+          <div class="of-title">TECHNOLOGY WEEKLY FOOD ORDER &nbsp;&nbsp;&nbsp; PRACTICAL / DEMO</div>
+          ${recipeBadge}
+          <div class="of-meta" style="margin-top:6px">
+            <span class="of-meta-lbl">DATE</span><span>_______________________&nbsp;&nbsp;&nbsp;&nbsp; <b>TASK / OUTPUT</b> _______________________</span>
+            <span class="of-meta-lbl">TEACHER</span>
+            <div class="of-checks">${['LE','SU','FP','ZA'].map(t=>`<div class="of-ck">☐ <b>${t}</b></div>`).join('')}</div>
+            <span class="of-meta-lbl">YEAR / CLASS</span>
+            <div class="of-checks">${['9','10','11','12','13'].map(y=>`<div class="of-ck">☐ <b>${y}</b></div>`).join('')}</div>
+            <span class="of-meta-lbl">DAY</span>
+            <div class="of-checks">${['MON','TUE','WED','THUR','FRI'].map(d=>`<div class="of-ck">☐ <b>${d}</b></div>`).join('')}</div>
+            <span class="of-meta-lbl">PERIOD</span>
+            <div class="of-checks">${['1','2','3','4','5'].map(p=>`<div class="of-ck">☐ <b>${p}</b></div>`).join('')}</div>
+          </div>
+        </div>
+
+        <div class="of-grid">${ofCol('TROLLEY')}${ofCol('HERBS_SPICES')}${ofCol('FROZEN')}${ofCol('SAUCES')}${ofCol('DAIRY')}</div>
+        <div class="of-grid">
+          <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">${ofCol('FRESH_HERBS')}${ofCol('EGGS')}</div>
+          ${ofCol('PASTRY')}${ofCol('FRUIT_VEG')}${ofCol('PASTA')}${ofCol('TINS')}
+        </div>
+        <div class="of-grid">
+          ${ofCol('MEAT')}${ofCol('BAKING')}
+          <div class="of-col"><div class="of-col-head">EQUIPMENT</div>${equipRows}</div>
+          <div style="flex:2;min-width:0"></div>
+        </div>
+
+        ${extraBlock}
+
+        <div class="of-notes">
+          <div class="of-notes-lbl">Technician notes / special instructions</div>
+        </div>
+        <div class="of-footer-bar">Massey High School — Food Technology Department${withRecipe?' &nbsp;·&nbsp; '+r.name:''}</div>
+      </div>
+    </div>`;
+
+  showScreen('orderform');
+}
+
+// ── Print the order form ──
+function printOrderForm() {
+  const content = document.getElementById('of-printable');
+  if (!content) return;
+  const w = window.open('', '_blank', 'width=900,height=700');
+  w.document.write(`<!DOCTYPE html><html><head><title>Order Form</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;font-size:10px;color:#111;padding:8px;max-width:800px}
+    .of-header{padding:7px 8px;border-bottom:2px solid #111;margin-bottom:3px}
+    .of-title{font-size:11px;font-weight:bold;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px}
+    .of-recipe-badge{background:#e8f8f0;border:1px solid #aad4be;border-radius:4px;padding:4px 8px;margin-bottom:5px;display:flex;align-items:center;gap:8px}
+    .of-meta{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;font-size:10px}
+    .of-meta-lbl{font-weight:bold;white-space:nowrap}
+    .of-checks{display:flex;gap:10px;flex-wrap:wrap}
+    .of-ck{display:flex;align-items:center;gap:3px}
+    .of-grid{display:flex;gap:2px;margin-bottom:2px}
+    .of-col{border:1px solid #999;flex:1;min-width:0}
+    .of-col-head{background:#1a3c34;color:#fff;font-size:9px;font-weight:bold;padding:2px 4px;letter-spacing:0.03em}
+    .of-row{display:flex;border-bottom:0.5px solid #e0e0e0}
+    .of-row:last-child{border-bottom:none}
+    .of-row.ticked{background:#dff5eb}
+    .of-item{flex:1;padding:2px 3px;font-size:9.5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+    .of-qty{width:34px;padding:2px 3px;text-align:center;border-left:0.5px solid #ddd;font-weight:bold;color:#085041;font-size:9.5px;flex-shrink:0}
+    .of-extra{margin-bottom:2px}
+    .of-extra-inner{border:1px solid #999}
+    .of-extra-items{display:flex;flex-wrap:wrap;gap:3px;padding:4px}
+    .of-extra-item{font-size:9.5px;border:1px solid #ddd;padding:2px 6px;border-radius:2px;background:#fff}
+    .of-notes{padding:6px;min-height:50px;border-top:1px solid #ddd}
+    .of-notes-lbl{font-size:9px;font-weight:bold;text-transform:uppercase;color:#777;margin-bottom:3px}
+    .of-footer-bar{text-align:center;font-size:9px;color:#aaa;padding:3px;border-top:1px solid #eee}
+    @media print{body{padding:2px}}
+  </style></head><body>
+  ${content.innerHTML}
+  <script>window.onload=function(){window.print()}<\/script>
+  </body></html>`);
+  w.document.close();
+}
+
+// ── Screen navigation ──
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  const onRecipes = ['browse','detail','orderform'].includes(name);
+  document.getElementById('nav-recipes').classList.toggle('active', onRecipes);
+  document.getElementById('nav-admin').classList.toggle('active', name === 'admin');
+  window.scrollTo(0, 0);
+}
+
+// ── Add recipe ──
+async function saveRecipe() {
+  const name = document.getElementById('a-name').value.trim();
+  if (!name) { showToast('Please enter a recipe name'); return; }
+  const ings = document.getElementById('a-ings').value.trim().split('\n').filter(Boolean).map(l => {
+    const p = l.split(','); return { qty:(p[0]||'').trim(), unit:(p[1]||'').trim(), name:(p[2]||'').trim() };
+  });
+  const steps = document.getElementById('a-steps').value.trim().split('\n').filter(Boolean);
+  recipes.push({
+    id: 'r' + Date.now(),
+    practical: document.getElementById('a-num').value.trim() || '',
+    name, emoji: document.getElementById('a-emoji').value || '🍴',
+    year: document.getElementById('a-year').value,
+    time: document.getElementById('a-time').value || '—',
+    desc: document.getElementById('a-desc').value,
+    ingredients: ings,
+    equipment: document.getElementById('a-equip').value,
+    steps
+  });
+  saveAll(); renderFilters(); renderCards(); renderManageList();
+  ['a-name','a-emoji','a-desc','a-ings','a-equip','a-steps','a-time','a-num'].forEach(id => document.getElementById(id).value = '');
+  showToast('Recipe added!');
+}
+
+// ── Delete recipe ──
+function deleteRecipe(id) {
+  if (Y9.some(r => r.id === id)) { showToast('Cannot delete built-in practicals'); return; }
+  if (!confirm('Delete this recipe?')) return;
+  recipes = recipes.filter(r => r.id !== id);
+  saveAll(); renderFilters(); renderCards(); renderManageList(); showToast('Deleted');
+}
+
+// ── Manage list ──
+function renderManageList() {
+  const el = document.getElementById('manage-list');
+  el.innerHTML = `<p style="font-size:13px;color:var(--text2);margin-bottom:4px">${recipes.length} recipe${recipes.length!==1?'s':''} loaded</p>` +
+    recipes.map(r => `
+      <div class="manage-row">
+        <div style="font-size:22px">${r.emoji||'🍴'}</div>
+        <div class="manage-row-info">
+          <span>${r.practical ? r.practical+': ' : ''}${r.name}</span>
+          <p>${r.year} &nbsp;·&nbsp; ${r.time}</p>
+        </div>
+        ${Y9.some(x => x.id === r.id)
+          ? `<span style="font-size:11px;color:var(--text2);padding:4px 8px">built-in</span>`
+          : `<button class="del-btn" onclick="deleteRecipe('${r.id}')"><i class="ti ti-trash"></i> Delete</button>`}
+      </div>`).join('');
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── Init ──
+loadRecipes();
+</script>
+</body>
+</html>
